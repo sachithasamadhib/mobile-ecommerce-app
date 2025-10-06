@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  TextInput
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { apiService } from '../services/api';
 import ProductCard from '../components/ProductCard';
 
@@ -20,13 +22,29 @@ const HomeScreen = ({ navigation }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [skip, setSkip] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const { logout, user } = useAuth();
+  const { getCartItemsCount } = useCart();
 
   const LIMIT = 30;
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    const delayedSearch = setTimeout(() => {
+      if (searchQuery.trim()) {
+        searchProducts();
+      } else if (isSearching) {
+        setIsSearching(false);
+        loadProducts(true);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayedSearch);
+  }, [searchQuery]);
 
   const loadProducts = async (isRefresh = false) => {
     try {
@@ -57,12 +75,29 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const searchProducts = async () => {
+    try {
+      setIsSearching(true);
+      setLoading(true);
+      const data = await apiService.searchProducts(searchQuery, LIMIT, 0);
+      setProducts(data.products);
+      setSkip(LIMIT);
+      setHasMore(data.products.length === LIMIT && LIMIT < data.total);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to search products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadMoreProducts = async () => {
-    if (loadingMore || !hasMore) return;
+    if (loadingMore || !hasMore || isSearching) return;
 
     try {
       setLoadingMore(true);
-      const data = await apiService.getProducts(LIMIT, skip);
+      const data = isSearching 
+        ? await apiService.searchProducts(searchQuery, LIMIT, skip)
+        : await apiService.getProducts(LIMIT, skip);
       
       setProducts(prevProducts => [...prevProducts, ...data.products]);
       setSkip(prevSkip => prevSkip + LIMIT);
@@ -96,13 +131,34 @@ const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <View>
+      <View style={styles.userInfo}>
         <Text style={styles.welcomeText}>Welcome back!</Text>
         <Text style={styles.emailText}>{user?.email}</Text>
       </View>
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+    </View>
+  );
+
+  const renderSearchBar = () => (
+    <View style={styles.searchContainer}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search products..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      {searchQuery.length > 0 && (
+        <TouchableOpacity 
+          style={styles.clearButton}
+          onPress={() => setSearchQuery('')}
+        >
+          <Text style={styles.clearButtonText}>✕</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
@@ -115,7 +171,7 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -135,12 +191,26 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('ProductDetail', { product: item })}
           />
         )}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={
+          <>
+            {renderHeader()}
+            {renderSearchBar()}
+            {isSearching && (
+              <Text style={styles.searchResultText}>
+                Search results for "{searchQuery}"
+              </Text>
+            )}
+          </>
+        }
         ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => loadProducts(true)}
+            onRefresh={() => {
+              setSearchQuery('');
+              setIsSearching(false);
+              loadProducts(true);
+            }}
             colors={['#007AFF']}
           />
         }
@@ -176,6 +246,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginBottom: 10,
   },
+  userInfo: {
+    flex: 1,
+  },
   welcomeText: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -195,6 +268,40 @@ const styles = StyleSheet.create({
   logoutText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#333',
+  },
+  clearButton: {
+    padding: 5,
+  },
+  clearButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  searchResultText: {
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
   listContainer: {
     paddingBottom: 20,

@@ -6,10 +6,83 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Image
+  Image,
+  Animated
 } from 'react-native';
 import { useCart } from '../context/CartContext';
 import { useNavigation } from '@react-navigation/native';
+
+const CartItem = ({ item, removeFromCart, updateQuantity }) => {
+  const scaleValue = new Animated.Value(1);
+
+  const animatePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  return (
+    <Animated.View style={[styles.cartItem, { transform: [{ scale: scaleValue }] }]}>
+      <Image source={{ uri: item.thumbnail }} style={styles.itemImage} />
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <Text style={styles.itemBrand}>{item.brand || 'Unknown Brand'}</Text>
+        <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
+        <View style={styles.quantityContainer}>
+          <TouchableOpacity 
+            style={[styles.quantityButton, item.quantity <= 1 && styles.quantityButtonDisabled]}
+            onPress={() => {
+              animatePress();
+              updateQuantity(item.id, item.quantity - 1);
+            }}
+            disabled={item.quantity <= 1}
+          >
+            <Text style={styles.quantityButtonText}>−</Text>
+          </TouchableOpacity>
+          <Text style={styles.quantity}>{item.quantity}</Text>
+          <TouchableOpacity 
+            style={styles.quantityButton}
+            onPress={() => {
+              animatePress();
+              updateQuantity(item.id, item.quantity + 1);
+            }}
+          >
+            <Text style={styles.quantityButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.itemActions}>
+        <Text style={styles.subtotal}>
+          {formatPrice(item.price * item.quantity)}
+        </Text>
+        <TouchableOpacity 
+          style={styles.removeButton}
+          onPress={() => removeFromCart(item.id)}
+        >
+          <Text style={styles.removeButtonText}>Remove</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
+};
 
 const CartScreen = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
@@ -38,46 +111,24 @@ const CartScreen = () => {
     );
   };
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
   const renderCartItem = ({ item }) => (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.thumbnail }} style={styles.itemImage} />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.itemPrice}>${item.price}</Text>
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity 
-            style={styles.quantityButton}
-            onPress={() => updateQuantity(item.id, item.quantity - 1)}
-          >
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.quantity}>{item.quantity}</Text>
-          <TouchableOpacity 
-            style={styles.quantityButton}
-            onPress={() => updateQuantity(item.id, item.quantity + 1)}
-          >
-            <Text style={styles.quantityButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.itemActions}>
-        <Text style={styles.subtotal}>
-          ${(item.price * item.quantity).toFixed(2)}
-        </Text>
-        <TouchableOpacity 
-          style={styles.removeButton}
-          onPress={() => removeFromCart(item.id)}
-        >
-          <Text style={styles.removeButtonText}>Remove</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <CartItem 
+      item={item}
+      removeFromCart={removeFromCart}
+      updateQuantity={updateQuantity}
+    />
   );
 
   const renderEmptyCart = () => (
     <View style={styles.emptyContainer}>
+      <Text style={styles.emptyIcon}>🛒</Text>
       <Text style={styles.emptyText}>Your cart is empty</Text>
       <Text style={styles.emptySubtext}>Add some products to get started</Text>
       <TouchableOpacity 
@@ -89,28 +140,44 @@ const CartScreen = () => {
     </View>
   );
 
-  const renderFooter = () => (
-    <View style={styles.footer}>
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalLabel}>Total: </Text>
-        <Text style={styles.totalAmount}>${getCartTotal().toFixed(2)}</Text>
+  const renderFooter = () => {
+    const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+    
+    return (
+      <View style={styles.footer}>
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Items ({itemCount}):</Text>
+            <Text style={styles.summaryValue}>{formatPrice(getCartTotal())}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Shipping:</Text>
+            <Text style={styles.summaryValue}>FREE</Text>
+          </View>
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total:</Text>
+            <Text style={styles.totalAmount}>{formatPrice(getCartTotal())}</Text>
+          </View>
+        </View>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity 
+            style={styles.clearButton}
+            onPress={handleClearCart}
+          >
+            <Text style={styles.clearButtonText}>Clear Cart</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.checkoutButton}
+            onPress={handleCheckout}
+          >
+            <Text style={styles.checkoutButtonText}>
+              Proceed to Checkout
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity 
-          style={styles.clearButton}
-          onPress={handleClearCart}
-        >
-          <Text style={styles.clearButtonText}>Clear Cart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.checkoutButton}
-          onPress={handleCheckout}
-        >
-          <Text style={styles.checkoutButtonText}>Checkout</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -128,6 +195,7 @@ const CartScreen = () => {
         renderItem={renderCartItem}
         contentContainerStyle={styles.listContainer}
         ListFooterComponent={renderFooter}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -144,19 +212,20 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 12,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
   },
   itemImage: {
     width: 80,
     height: 80,
     borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
   itemDetails: {
     flex: 1,
@@ -166,7 +235,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 4,
+  },
+  itemBrand: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 4,
+    fontStyle: 'italic',
   },
   itemPrice: {
     fontSize: 14,
@@ -180,11 +255,15 @@ const styles = StyleSheet.create({
   },
   quantityButton: {
     backgroundColor: '#e0e0e0',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  quantityButtonDisabled: {
+    backgroundColor: '#f0f0f0',
+    opacity: 0.5,
   },
   quantityButtonText: {
     fontSize: 16,
@@ -196,6 +275,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    minWidth: 20,
+    textAlign: 'center',
   },
   itemActions: {
     alignItems: 'flex-end',
@@ -211,6 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
+    marginTop: 8,
   },
   removeButtonText: {
     color: '#fff',
@@ -220,26 +302,41 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 20,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 20,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
   },
-  totalContainer: {
+  summaryContainer: {
+    marginBottom: 20,
+  },
+  summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingVertical: 4,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  totalRow: {
+    paddingTop: 12,
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   totalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#333',
   },
   totalAmount: {
@@ -250,18 +347,19 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 10,
   },
   clearButton: {
     backgroundColor: '#ff4444',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
-    flex: 0.45,
+    flex: 0.3,
   },
   clearButtonText: {
     color: '#fff',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   checkoutButton: {
@@ -269,7 +367,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
-    flex: 0.45,
+    flex: 0.65,
   },
   checkoutButtonText: {
     color: '#fff',
@@ -282,6 +380,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 20,
   },
   emptyText: {
     fontSize: 24,

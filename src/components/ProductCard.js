@@ -5,7 +5,8 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { useCart } from '../context/CartContext';
 
@@ -18,6 +19,9 @@ const ProductCard = ({ product, onPress }) => {
   const handleAddToCart = (e) => {
     e.stopPropagation();
     addToCart(product, 1);
+    Alert.alert('Added to Cart', `${product.title} added to cart!`, [
+      { text: 'OK', style: 'default' }
+    ]);
   };
 
   const renderStars = (rating) => {
@@ -38,6 +42,13 @@ const ProductCard = ({ product, onPress }) => {
     return stars.join('');
   };
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image 
@@ -45,16 +56,24 @@ const ProductCard = ({ product, onPress }) => {
         style={styles.image}
         resizeMode="cover"
       />
+      {product.discountPercentage > 0 && (
+        <View style={styles.discountBadge}>
+          <Text style={styles.discountText}>-{Math.round(product.discountPercentage)}%</Text>
+        </View>
+      )}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {product.title}
+        </Text>
+        <Text style={styles.brand} numberOfLines={1}>
+          {product.brand || 'Unknown Brand'}
         </Text>
         <View style={styles.ratingContainer}>
           <Text style={styles.stars}>{renderStars(product.rating)}</Text>
           <Text style={styles.rating}>({product.rating})</Text>
         </View>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>${product.price}</Text>
+          <Text style={styles.price}>{formatPrice(product.price)}</Text>
           <TouchableOpacity 
             style={styles.addButton}
             onPress={handleAddToCart}
@@ -62,6 +81,7 @@ const ProductCard = ({ product, onPress }) => {
             <Text style={styles.addButtonText}>Add</Text>
           </TouchableOpacity>
         </View>
+        <Text style={styles.stock}>Stock: {product.stock}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -71,19 +91,34 @@ const styles = StyleSheet.create({
   card: {
     width: cardWidth,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: 150,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    backgroundColor: '#f0f0f0',
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#ff4444',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    zIndex: 1,
+  },
+  discountText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   content: {
     padding: 12,
@@ -92,8 +127,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 4,
     lineHeight: 18,
+  },
+  brand: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 6,
+    fontStyle: 'italic',
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -113,6 +154,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 4,
   },
   price: {
     fontSize: 16,
@@ -129,6 +171,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+  },
+  stock: {
+    fontSize: 10,
+    color: '#888',
+    fontStyle: 'italic',
   },
 });
 
