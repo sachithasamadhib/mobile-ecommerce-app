@@ -1,21 +1,30 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || "your_firebase_api_key_here",
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "your_project_id.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || "your_project_id_here",
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "your_project_id.appspot.com",
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "your_sender_id_here",
-  appId: process.env.FIREBASE_APP_ID || "your_app_id_here"
+  apiKey: Constants.expoConfig?.extra?.firebaseApiKey,
+  authDomain: Constants.expoConfig?.extra?.firebaseAuthDomain,
+  projectId: Constants.expoConfig?.extra?.firebaseProjectId,
+  storageBucket: Constants.expoConfig?.extra?.firebaseStorageBucket,
+  messagingSenderId: Constants.expoConfig?.extra?.firebaseMessagingSenderId,
+  appId: Constants.expoConfig?.extra?.firebaseAppId
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+let auth;
 
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+try {
+  app = initializeApp(firebaseConfig);
+  
+  // Initialize Firebase Auth with AsyncStorage persistence for React Native
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+}
 
 export { auth };
 export default app;

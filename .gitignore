@@ -30,14 +30,6 @@ expo-env.d.ts
 # Logs
 logs
 *.log
-
-# macOS
-.DS_Store
-
-# Metro
-.metro-health-check*
-
-# debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
@@ -46,8 +38,15 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# Metro
+.metro-health-check*
+
+# Backup files
+*.backup
+app.json.backup
+
+# Build files
+build-scripts.json
 
 # typescript
 *.tsbuildinfo
@@ -55,5 +54,4 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-
 .env
