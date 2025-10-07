@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+import LoadingScreen from '../components/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -118,7 +119,7 @@ const Navigation = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return null;
+    return <LoadingScreen message="Initializing app..." />;
   }
 
   return (
