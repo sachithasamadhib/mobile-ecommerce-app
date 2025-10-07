@@ -278,9 +278,4 @@ npm run type-check
 
 This project is licensed under the MIT License.
 
-## 🆘 Support
-
-- 📧 **Email**: [sachitha.samadhi@example.com](mailto:sachitha.samadhi@example.com)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/sachithasamadhib/mobile-ecommerce-app/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/sachithasamadhib/mobile-ecommerce-app/discussions)
 ---
