@@ -100,83 +100,6 @@ A modern mobile e-commerce application built with React Native and Expo, featuri
 - **State Management**: React Context API
 - **Storage**: AsyncStorage
 
-## 🏗️ Project Structure
-
-```
-src/
-├── components/       # Reusable UI components
-├── context/         # React Context providers
-├── navigation/      # Navigation configuration
-├── screens/         # Screen components
-├── services/        # API and external services
-└── utils/          # Utility functions
-```
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Developer
-
-**Sachitha Samadhi Bandara**
-- GitHub: [@sachithasamadhib](https://github.com/sachithasamadhib)
-- Email: sachithasbandara6@gmail.com
-- **Shopping Cart** with add/remove functionality
-- **Real-time Cart Updates** with Context API
-- **Order History** and tracking
-
-### 💳 Payment Processing
-- **Stripe Integration** for secure payments
-- **Multiple Payment Methods** support
-- **Payment Intent Creation** and confirmation
-- **Transaction Security** with encrypted data
-
-### 📱 User Interface
-- **Modern Design** with intuitive navigation
-- **Responsive Layout** for all screen sizes
-- **Bottom Tab Navigation** for easy access
-- **Loading States** and error handling
-- **Cross-platform Compatibility** (iOS & Android)
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js** (v18 or later)
-- **npm** or **yarn**
-- **Expo CLI**: `npm install -g @expo/cli`
-- **iOS Simulator** (Mac) or **Android Emulator**
-- **Expo Go** app on your mobile device
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/sachithasamadhib/mobile-ecommerce-app.git
-   cd mobile-ecommerce-app
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   Then edit `.env` with your actual Firebase and Stripe credentials
-
-4. **Start the development server**
-   ```bash
-   npm start
-   ```
-
-5. **Run on device/simulator**
-   - Scan QR code with **Expo Go** app (mobile)
-   - Press `a` for **Android emulator**
-   - Press `i` for **iOS simulator**
-
 ## 📦 Project Structure
 
 ```
@@ -353,34 +276,11 @@ npm run type-check
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 🆘 Support
 
 - 📧 **Email**: [sachitha.samadhi@example.com](mailto:sachitha.samadhi@example.com)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/sachithasamadhib/mobile-ecommerce-app/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/sachithasamadhib/mobile-ecommerce-app/discussions)
-
-## 🙏 Acknowledgments
-
-- **Expo Team** - For the amazing development platform
-- **Firebase** - For backend services
-- **Stripe** - For payment processing
-- **DummyJSON** - For product data API
-- **React Native Community** - For continuous support
-
-## 📊 Project Status
-
-- ✅ **Authentication System** - Complete
-- ✅ **Product Catalog** - Complete
-- ✅ **Shopping Cart** - Complete
-- ✅ **Payment Integration** - Complete
-- 🚧 **Order Management** - In Progress
-- ⏳ **Push Notifications** - Planned
-- ⏳ **Offline Support** - Planned
-
 ---
-
-**Built with ❤️ by [Sachitha Samadhi](https://github.com/sachithasamadhib)**
-
-⭐ **Star this repository if you found it helpful!**
