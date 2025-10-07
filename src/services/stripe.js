@@ -1,6 +1,7 @@
 import { initStripe } from '@stripe/stripe-react-native';
+import Constants from 'expo-constants';
 
-const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
+const STRIPE_PUBLISHABLE_KEY = Constants.expoConfig?.extra?.stripePublishableKey || 'pk_test_your_stripe_publishable_key_here';
 
 export const initializeStripe = async () => {
   await initStripe({
@@ -15,7 +16,7 @@ export const stripeService = {
       const response = await fetch('https://api.stripe.com/v1/payment_intents', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          'Authorization': `Bearer ${Constants.expoConfig?.extra?.stripeSecretKey}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: `amount=${Math.round(amount * 100)}&currency=${currency}`,
@@ -34,7 +35,7 @@ export const stripeService = {
       const response = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentClientSecret.split('_secret_')[0]}/confirm`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          'Authorization': `Bearer ${Constants.expoConfig?.extra?.stripeSecretKey}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: `payment_method=${paymentMethodId}`,
