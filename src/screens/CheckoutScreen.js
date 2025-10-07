@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   cardField: {
     backgroundColor: '#f8f9fa',
-    textColor: '#333',
+    color: '#333',
     fontSize: 16,
     borderRadius: 8,
     borderWidth: 1,

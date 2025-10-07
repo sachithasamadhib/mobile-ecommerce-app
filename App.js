@@ -6,8 +6,7 @@ import { CartProvider } from './src/context/CartContext';
 import Navigation from './src/navigation/Navigation';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { initializeStripe } from './src/services/stripe';
-
-const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
+import Constants from 'expo-constants';
 
 export default function App() {
   useEffect(() => {
@@ -16,7 +15,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+      <StripeProvider publishableKey={Constants.expoConfig?.extra?.stripePublishableKey}>
         <AuthProvider>
           <CartProvider>
             <Navigation />
